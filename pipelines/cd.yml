@@ -1,0 +1,61 @@
+resources:
+  pipelines:
+    - pipeline: ci_logic
+      source: "CI Logic"
+      trigger:
+        branches:
+          include:
+            - main
+
+trigger: none
+
+stages:
+  jobs:
+    - deployment: deploy_infra
+      environment: dev
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+                inputs:
+                  command: init
+                  workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+                  backendServiceArm: "***"
+                  backendAzureRmResourceGroupName: "rg-cellenza-infra"
+                  backendAzureRmStorageAccountName: sacellenzainfra
+                  backendAzureRmContainerName: terraform
+                  backendAzureRmKey: "***"
+              - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+                inputs:
+                  command: plan
+                  workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+                  environmentServiceNameAzureRM: '***'
+                  backendServiceArm: '***'
+                  backendAzureRmResourceGroupName: "rg-cellenza-infra"
+                  backendAzureRmStorageAccountName: sacellenzainfra
+                  backendAzureRmContainerName: terraform
+                  backendAzureRmKey: '***'
+              - task: ms-devlabs.custom-terraform-tasks.custom-terraform-release-task.TerraformTaskV4@4
+                inputs:
+                  command: apply
+                  workingDirectory: '$(System.DefaultWorkingDirectory)/terraform'
+                  environmentServiceNameAzureRM: '***'
+                  backendServiceArm: '***'
+                  backendAzureRmResourceGroupName: "rg-cellenza-infra"
+                  backendAzureRmStorageAccountName: sacellenzainfra
+                  backendAzureRmContainerName: terraform
+                  backendAzureRmKey: '***'
+    - deployment: deploy_logicapp
+      environment: dev
+      strategy:
+        runOnce:
+          deploy:
+            steps:
+              - task: AzureFunctionApp@1
+                displayName: Deploy logic app
+                inputs:
+                  azureSubscription: #SUBSCRIPTION#
+                  appType: "functionApp"
+                  appName: "logic-cellenza-blog"
+                  package: "$(Pipeline.Workspace)/blog/logicapp/logicapp.zip"

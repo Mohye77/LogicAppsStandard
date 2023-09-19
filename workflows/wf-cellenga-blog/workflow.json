@@ -1,0 +1,33 @@
+{
+  "definition": {
+      "$schema": "https://schema.management.azure.com/providers/Microsoft.Logic/schemas/2016-06-01/workflowdefinition.json#",
+      "actions": {
+          "HTTP": {
+              "type": "Http",
+              "inputs": {
+                  "uri": "https://www.cellenza.com",
+                  "method": "GET"
+              },
+              "runAfter": {},
+              "runtimeConfiguration": {
+                  "contentTransfer": {
+                      "transferMode": "Chunked"
+                  }
+              }
+          }
+      },
+      "contentVersion": "1.0.0.0",
+      "outputs": {},
+      "triggers": {
+          "Recurrence": {
+              "type": "Recurrence",
+              "recurrence": {
+                  "interval": 120,
+                  "frequency": "Minute"
+              }
+          }
+      },
+      "parameters": {}
+  },
+  "kind": "Stateful"
+}

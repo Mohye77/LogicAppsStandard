@@ -1,0 +1,31 @@
+trigger:
+  - main
+
+stages:
+  - stage: Build
+    jobs:
+      - job: logicapp_build
+        steps:
+          - task: CopyFiles@2
+            displayName: "Create logic apps folder"
+            inputs:
+              SourceFolder: "$(System.DefaultWorkingDirectory)"
+              Contents: |
+                workflows/**
+              TargetFolder: "logic_output"
+
+          - task: ArchiveFiles@2
+            displayName: "Create logic apps zip"
+            inputs:
+              rootFolderOrFile: "$(System.DefaultWorkingDirectory)/logic_output/workflows"
+              includeRootFolder: false
+              archiveType: "zip"
+              archiveFile: "$(Build.ArtifactStagingDirectory)/logicapp.zip"
+              replaceExistingArchive: true
+
+          - task: PublishPipelineArtifact@1
+            displayName: "Publish logic apps zip artifact"
+            inputs:
+              targetPath: "$(Build.ArtifactStagingDirectory)/logicapp.zip"
+              artifact: "logicapp"
+              publishLocation: "pipeline"
